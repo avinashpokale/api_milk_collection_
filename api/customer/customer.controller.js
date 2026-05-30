@@ -88,3 +88,47 @@ export const deleteById = async (req, res) => {
     res.status(500).json({ success: 0, message: error.message });
   }
 };
+
+// 6. GetNextCode - GET /customer/next-code
+export const getNextCode = async (req, res) => {
+  try {
+    const shopId = req.decoded.shopId;
+
+    // 1. Fetch only the 'code' field for active customers in this shop
+    const customers = await Customer.find(
+      { shopId, status: 1 },
+      { code: 1, _id: 0 }
+    );
+
+    // 2. Map codes to clean numbers, remove strings/spaces, and sort ascending
+    const usedCodes = customers
+      .map(c => {
+        // Remove any unintentional whitespace characters
+        const cleanStr = String(c.code).replace(/\s+/g, '');
+        return parseInt(cleanStr, 10);
+      })
+      .filter(Number.isInteger)             // Ensure it's a valid number
+      .sort((a, b) => a - b);               // Sort numerically: 1, 2, 3...
+
+    // 3. Loop to find the lowest unused sequential number or filling the middle gap
+    let nextUniqueCode = 1;
+    for (let i = 0; i < usedCodes.length; i++) {
+      if (usedCodes[i] === nextUniqueCode) {
+        nextUniqueCode++;
+      } else if (usedCodes[i] > nextUniqueCode) {
+        // Gap identified! Example: sequence has 1, 2, 4. 
+        // 3 is lower than 4, so we break and return 3.
+        break;
+      }
+    }
+
+    // 4. Return the next available unique code as a string
+    res.status(200).json({ 
+      success: 1, 
+      nextCode: String(nextUniqueCode) 
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: 0, message: error.message });
+  }
+};

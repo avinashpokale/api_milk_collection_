@@ -6,7 +6,7 @@ const customerSchema = new mongoose.Schema({
     ref: 'shopDetails',
     required: true
   },
-  code: { type: String, required: true },
+  code: { type: String, required: true, trim: true },
   name: { type: String, required: true },
   address: { type: String, required: true },
   status: { type: Number, default: 1 } // 1: Active, 0: Soft Deleted
