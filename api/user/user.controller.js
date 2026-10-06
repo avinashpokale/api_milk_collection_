@@ -66,7 +66,7 @@ export async function login(req, res) {
                 const jsontoken = jwt.sign(
                     { id: user._id, role: user.role, shopId: user.shopId?._id },
                     process.env.JWT_KEY,
-                    { expiresIn: "1h" }
+                    { expiresIn: "3h" }
                 );
 
                 const userResponse = user.toObject();
@@ -76,7 +76,7 @@ export async function login(req, res) {
                     success: 1,
                     message: "Login successful. Welcome, " + userResponse.name,
                     token: jsontoken,
-                    expiresIn: 3600,
+                    expiresIn: 10800,
                     user: userResponse
                 });
             }
